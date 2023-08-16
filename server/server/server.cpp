@@ -15,7 +15,10 @@ void Server::SendToClient(QString str)
   Data.clear();
   QDataStream out(&Data, QIODevice::WriteOnly);
   out << str;
-  socket->write(Data);
+  //socket->write(Data);
+  for(int i=0; i<Sockets.size(); ++i){
+    Sockets[i]->write(Data);
+  }
 }
 
 void Server::incomingConnection(qintptr socketDescriptor)
@@ -38,6 +41,7 @@ void Server::slotReadyRead()
     QString str;
     in >> str;
     qDebug() << str;
+    SendToClient(str);
   }
   else{
     qDebug() << "DataStream error";

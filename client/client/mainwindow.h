@@ -19,9 +19,16 @@ class MainWindow : public QMainWindow
 private slots:
     void on_pushButton_clicked();
 
+    void on_pushButton_2_clicked();
+
+    void on_lineEdit_returnPressed();
+
 private:
     Ui::MainWindow *ui;
     QTcpSocket *socket;
     QByteArray Data;
+    void SendToServer(QString str);
+public slots:
+    void slotReadyRead();
 };
 #endif // MAINWINDOW_H
