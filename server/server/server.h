@@ -4,6 +4,7 @@
 #include <QTcpServer>
 #include <QTcpSocket>
 #include <QVector>
+#include <QTime>
 
 class Server : public QTcpServer
 {
@@ -16,10 +17,16 @@ private:
   QVector<QTcpSocket *> Sockets;
   QByteArray Data;
   void SendToClient(QString str);
+  quint16 nextBlockSize;
 
 public slots:
   void incomingConnection(qintptr socketDescriptor);
+  void disconnectConnection();
   void slotReadyRead();
+
+signals:
+  void clientDisconnected();
+
 };
 
 #endif // SERVER_H

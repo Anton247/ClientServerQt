@@ -9,6 +9,7 @@ MainWindow::MainWindow(QWidget *parent)
   socket = new QTcpSocket(this);
   connect(socket, &QTcpSocket::readyRead, this, &MainWindow::slotReadyRead);
   connect(socket, &QTcpSocket::disconnected, socket, &QTcpSocket::deleteLater);
+  nextBlockSize = 0;
 }
 
 MainWindow::~MainWindow()
@@ -26,17 +27,38 @@ void MainWindow::SendToServer(QString str)
 {
   Data.clear();
   QDataStream out(&Data, QIODevice::WriteOnly);
-  out << str;
+  out << quint16(0) << QTime::currentTime() << str;
+  out.device()->seek(0);
+  out << quint16(Data.size() - sizeof(quint16));
   socket->write(Data);
+  ui->lineEdit->clear();
 }
 
 void MainWindow::slotReadyRead()
 {
   QDataStream in(socket);
   if(in.status() == QDataStream::Ok){
-    QString str;
+    /*QString str;
     in >> str;
-    ui->textBrowser->append(str);
+    ui->textBrowser->append(str);*/
+    while(true){
+      if(nextBlockSize == 0){
+        if(socket->bytesAvailable() < 2){
+          break;
+        }
+        in >> nextBlockSize;
+      }
+      if(socket->bytesAvailable() < nextBlockSize){
+        break;
+      }
+
+      QString str;
+      QTime time;
+      in >> time >> str;
+      nextBlockSize = 0;
+      ui->textBrowser->append(time.toString() + " " + str);
+      break;
+    }
   }
   else{
     ui->textBrowser->append("read error");
